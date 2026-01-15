@@ -39,6 +39,8 @@ pub trait Syscall {
     fn sys_link(&mut self) -> SysResult;
     fn sys_mkdir(&mut self) -> SysResult;
     fn sys_close(&mut self) -> SysResult;
+    // 【Lab 1】添加 sys_trace 定义
+    fn sys_trace(&mut self) -> SysResult;
 }
 
 impl Syscall for Proc {
@@ -52,6 +54,14 @@ impl Syscall for Proc {
         println!("[{}].fork() = {:?}(pid)", self.excl.lock().pid, ret);
 
         ret
+    }
+
+    // 【Lab 1】实现 sys_trace
+    fn sys_trace(&mut self) -> SysResult {
+        // arg_i32(0) 获取第一个参数，即 trace(mask)
+        let mask = self.arg_i32(0);
+        self.trace_mask = mask;
+        Ok(0)
     }
 
     /// Exit the current process normally.
@@ -191,6 +201,18 @@ impl Syscall for Proc {
         if result.is_err() {
             syscall_warning(error);
         }
+
+        // 【Lab 1 附加题】打印第一个进程的页表
+        let guard = self.excl.lock();
+        if guard.pid == 1 {
+            let data = self.data.get_mut();
+            if let Some(pt) = data.pagetable.as_ref() {
+                // 调用我们在 pagetable.rs 里实现的 vm_print
+                pt.vm_print(0);
+            }
+        }
+        drop(guard);
+
         result
     }
 

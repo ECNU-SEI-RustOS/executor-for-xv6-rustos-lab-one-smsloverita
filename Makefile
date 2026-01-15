@@ -114,7 +114,7 @@ UPROGS=\
 	$(USER)/_grind\
 	$(USER)/_wc\
 	$(USER)/_zombie\
-
+    $(USER)/_trace\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
